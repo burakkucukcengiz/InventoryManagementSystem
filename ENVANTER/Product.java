@@ -16,6 +16,9 @@ public abstract class Product implements Storable {
     
     public String getName() { return name; }
     public int getQuantity() { return quantity; }
+    public double getPrice() { return price; } 
+    
+   
     public void setQuantity(int quantity) { this.quantity = quantity; }
 
     @Override
@@ -27,9 +30,9 @@ public abstract class Product implements Storable {
     public boolean isLowStock() {
         return this.quantity < 5; 
     }
-    @Override
-public String toString() {
-    return "Ürün [ID=" + id + ", İsim=" + name + ", Stok=" + quantity + ", Fiyat=" + price + "]";
-}
 
+    @Override
+    public String toString() {
+        return "Ürün [ID=" + id + ", İsim=" + name + ", Stok=" + quantity + ", Fiyat=" + price + "]";
+    }
 }
