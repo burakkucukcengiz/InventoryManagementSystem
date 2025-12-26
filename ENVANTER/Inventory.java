@@ -2,6 +2,7 @@ package ENVANTER;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Comparator;
 
 public class Inventory {
     private List<Product> products = new ArrayList<>(); 
@@ -36,6 +37,12 @@ public class Inventory {
         }
         System.out.println("-------------------------------\n");
     }
+
+    // YENİ: Ürünleri ucuzdan pahalıya sıralayan metod
+public void sortByPrice() {
+    products.sort(Comparator.comparingDouble(Product::getPrice));
+    System.out.println("Sistem: Ürünler fiyata göre (en düşükten en yükseğe) sıralandı.");
+}
 
     public void checkLowStockAlerts() {
         for (Product p : products) {

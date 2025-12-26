@@ -11,20 +11,25 @@ public class Main {
             Product elma = new PerishableProduct("1", "Elma", 10, 15.0, new Date());
             envanter.addProduct(elma);
 
-            // TEST 2: Hatalı Ürün Ekleme (Hata yönetimi testi için)
-            // Eğer buradaki stok miktarını -5 yaparsan alttaki catch bloğu çalışır.
             Product sut = new PerishableProduct("2", "Süt", 3, 25.0, new Date());
             envanter.addProduct(sut);
+            
+            // TEST 2: Daha ucuz bir ürün ekleyelim ki sıralama belli olsun
+            Product ekmek = new PerishableProduct("3", "Ekmek", 20, 10.0, new Date());
+            envanter.addProduct(ekmek);
 
-            // TEST 3: Listeleme
-            System.out.println("\n--- Envanter Sistemi Başlatıldı ---");
+            System.out.println("\n--- 1. SIRALAMA ÖNCESİ LİSTE ---");
+            envanter.listInventory();
+
+            // TEST 3: Fiyata Göre Sıralama Özelliği
+            System.out.println("--- 2. FİYATA GÖRE SIRALANIYOR (Ucuz -> Pahalı) ---");
+            envanter.sortByPrice();
             envanter.listInventory();
 
             // TEST 4: Stok Uyarısı
             envanter.checkLowStockAlerts();
 
         } catch (InvalidProductException e) {
-            // Hata oluştuğunda program durmaz, buraya zıplar ve mesajı yazdırır
             System.err.println("Sistem Hatası Yakalandı: " + e.getMessage());
         }
         
