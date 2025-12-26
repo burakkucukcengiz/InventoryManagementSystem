@@ -6,14 +6,20 @@ public abstract class Product implements Storable {
     private int quantity;
     private double price;
 
-    public Product(String id, String name, int quantity, double price) {
+    // CONSTRUCTOR GÜNCELLENDİ: Validation ve Exception eklendi
+    public Product(String id, String name, int quantity, double price) throws InvalidProductException {
+        if (id == null || id.isEmpty()) {
+            throw new InvalidProductException("Hata: Ürün ID'si boş olamaz!");
+        }
+        if (name == null || name.isEmpty()) {
+            throw new InvalidProductException("Hata: Ürün ismi boş olamaz!");
+        }
         this.id = id;
         this.name = name;
         this.quantity = quantity;
         this.price = price;
     }
 
-    // 1. ADIM: Eklenen Getter Metodu
     public String getId() { 
         return id; 
     }
