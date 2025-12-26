@@ -41,4 +41,8 @@ public class Inventory {
         System.out.println("Hata: '" + name + "' envanterde yok!"); 
         return null;
     }
+    // Envanterdeki toplam farklı ürün sayısını döndürür
+    public int getProductCount() {
+        return products.size();
+    }
 }
