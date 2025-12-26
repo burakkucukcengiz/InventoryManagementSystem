@@ -44,6 +44,12 @@ public void sortByPrice() {
     System.out.println("Sistem: Ürünler fiyata göre (en düşükten en yükseğe) sıralandı.");
 }
 
+// YENİ: Ürünleri stok miktarına göre (en azdan en çoğa) sıralar
+public void sortByQuantity() {
+    products.sort(Comparator.comparingInt(Product::getQuantity));
+    System.out.println("Sistem: Ürünler stok miktarına göre (kritik seviyeden yukarıya) sıralandı.");
+}
+
     public void checkLowStockAlerts() {
         for (Product p : products) {
             if (p.isLowStock()) {
