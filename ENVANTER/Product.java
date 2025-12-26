@@ -13,12 +13,15 @@ public abstract class Product implements Storable {
         this.price = price;
     }
 
+    // 1. ADIM: Eklenen Getter Metodu
+    public String getId() { 
+        return id; 
+    }
     
     public String getName() { return name; }
     public int getQuantity() { return quantity; }
     public double getPrice() { return price; } 
     
-   
     public void setQuantity(int quantity) { this.quantity = quantity; }
 
     @Override
