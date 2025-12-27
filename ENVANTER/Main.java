@@ -28,6 +28,16 @@ public class Main {
             // TEST 4: Stok Uyarısı
             envanter.checkLowStockAlerts();
 
+            // TEST 5: GELİŞMİŞ RAPORLAMA TESTİ (11. ve 12. Commit Özellikleri)
+            System.out.println("\n📊 --- ENVANTER ANALİZ RAPORU ---");
+            System.out.println("Toplam Mali Değer: " + envanter.calculateTotalValue() + " TL");
+            
+            if (envanter.getProductCount() > 0) {
+                System.out.println("En Pahalı Ürün: " + envanter.getMostExpensiveProduct().getName());
+                System.out.println("En Ucuz Ürün: " + envanter.getCheapestProduct().getName());
+            }
+            System.out.println("----------------------------------\n");
+
         } catch (InvalidProductException e) {
             System.err.println("Sistem Hatası Yakalandı: " + e.getMessage());
         }

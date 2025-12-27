@@ -70,4 +70,32 @@ public void sortByQuantity() {
     public int getProductCount() {
         return products.size();
     }
+    // 11. COMMIT ÖZELLİĞİ: Envanterin toplam TL değerini hesaplar
+    public double calculateTotalValue() {
+        double totalValue = 0;
+        for (Product p : products) {
+            totalValue += p.getPrice() * p.getQuantity();
+        }
+        return totalValue;
+    }
+
+    // 12. COMMIT ÖZELLİĞİ: En pahalı ürünü bulur
+    public Product getMostExpensiveProduct() {
+        if (products.isEmpty()) return null;
+        Product max = products.get(0);
+        for (Product p : products) {
+            if (p.getPrice() > max.getPrice()) max = p;
+        }
+        return max;
+    }
+
+    // 12. COMMIT ÖZELLİĞİ: En ucuz ürünü bulur
+    public Product getCheapestProduct() {
+        if (products.isEmpty()) return null;
+        Product min = products.get(0);
+        for (Product p : products) {
+            if (p.getPrice() < min.getPrice()) min = p;
+        }
+        return min;
+    }
 }
