@@ -1,6 +1,7 @@
 package ENVANTER;
 
 import java.util.Date;
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
@@ -35,6 +36,19 @@ public class Main {
             if (envanter.getProductCount() > 0) {
                 System.out.println("En Pahalı Ürün: " + envanter.getMostExpensiveProduct().getName());
                 System.out.println("En Ucuz Ürün: " + envanter.getCheapestProduct().getName());
+            }
+            System.out.println("----------------------------------");
+
+            // TEST 6: GELİŞMİŞ FİLTRELEME (13. Commit)
+            System.out.println("\n🔍 ARAMA FİLTRESİ: 'el' içeren ürünler listeleniyor...");
+            List<Product> sonuclar = envanter.filterProductsByName("el");
+            
+            if (sonuclar.isEmpty()) {
+                System.out.println("-> Aranan kriterde ürün bulunamadı.");
+            } else {
+                for (Product p : sonuclar) {
+                    System.out.println("-> Eşleşme Bulundu: " + p.getName() + " (ID: " + p.getId() + ")");
+                }
             }
             System.out.println("----------------------------------\n");
 

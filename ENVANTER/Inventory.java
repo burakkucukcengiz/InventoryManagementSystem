@@ -98,4 +98,15 @@ public void sortByQuantity() {
         }
         return min;
     }
+    // 13. COMMIT ÖZELLİĞİ: İsminde belirli bir metin geçen tüm ürünleri listeler
+public List<Product> filterProductsByName(String part) {
+    List<Product> found = new ArrayList<>();
+    for (Product p : products) {
+        // contains ve toLowerCase ile esnek arama yapıyoruz
+        if (p.getName().toLowerCase().contains(part.toLowerCase())) {
+            found.add(p);
+        }
+    }
+    return found;
+}
 }
