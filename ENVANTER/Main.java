@@ -6,56 +6,51 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
         Inventory envanter = new Inventory();
-
+        
         try {
-            // TEST 1: Ürünleri Sisteme Ekliyoruz
-            envanter.addProduct(new PerishableProduct("1", "Elma", 10, 15.0, new Date()));
-            envanter.addProduct(new PerishableProduct("2", "Süt", 3, 25.0, new Date()));
-            envanter.addProduct(new PerishableProduct("3", "Ekmek", 20, 10.0, new Date()));
-
-            System.out.println("\n--- 1. SIRALAMA ÖNCESİ LİSTE ---");
-            envanter.listInventory();
-
-            // TEST 2: Fiyata Göre Sıralama (Ucuz -> Pahalı)
-            System.out.println("--- 2. FİYATA GÖRE SIRALANIYOR ---");
-            envanter.sortByPrice();
-            envanter.listInventory();
-
-            // TEST 3: Stok Miktarına Göre Sıralama (Az -> Çok)
-            System.out.println("--- 3. STOK MİKTARINA GÖRE SIRALANIYOR ---");
-            envanter.sortByQuantity();
-            envanter.listInventory();
-
-            // TEST 4: Stok Uyarısı
-            envanter.checkLowStockAlerts();
-
-            // TEST 5: GELİŞMİŞ RAPORLAMA TESTİ (11. ve 12. Commit Özellikleri)
-            System.out.println("\n📊 --- ENVANTER ANALİZ RAPORU ---");
-            System.out.println("Toplam Mali Değer: " + envanter.calculateTotalValue() + " TL");
+            // Testleri modüler parçalara ayırdık
+            runSetup(envanter);
+            runSortingTests(envanter);
+            runReportingTests(envanter);
+            runSearchTests(envanter);
             
-            if (envanter.getProductCount() > 0) {
-                System.out.println("En Pahalı Ürün: " + envanter.getMostExpensiveProduct().getName());
-                System.out.println("En Ucuz Ürün: " + envanter.getCheapestProduct().getName());
-            }
-            System.out.println("----------------------------------");
-
-            // TEST 6: GELİŞMİŞ FİLTRELEME (13. Commit)
-            System.out.println("\n🔍 ARAMA FİLTRESİ: 'el' içeren ürünler listeleniyor...");
-            List<Product> sonuclar = envanter.filterProductsByName("el");
-            
-            if (sonuclar.isEmpty()) {
-                System.out.println("-> Aranan kriterde ürün bulunamadı.");
-            } else {
-                for (Product p : sonuclar) {
-                    System.out.println("-> Eşleşme Bulundu: " + p.getName() + " (ID: " + p.getId() + ")");
-                }
-            }
-            System.out.println("----------------------------------\n");
-
         } catch (InvalidProductException e) {
-            System.err.println("Sistem Hatası Yakalandı: " + e.getMessage());
+            System.err.println("⚠️ Sistem Hatası: " + e.getMessage());
         }
         
-        System.out.println("\nSistem: Program akışı başarıyla sonlandı.");
+        System.out.println("\n✅ Sistem: Program akışı başarıyla sonlandı.");
+    }
+
+    // Ürün ekleme mantığı
+    private static void runSetup(Inventory inv) throws InvalidProductException {
+        inv.addProduct(new PerishableProduct("1", "Elma", 10, 15.0, new Date()));
+        inv.addProduct(new PerishableProduct("2", "Süt", 3, 25.0, new Date()));
+        inv.addProduct(new PerishableProduct("3", "Ekmek", 20, 10.0, new Date()));
+    }
+
+    // Sıralama testleri
+    private static void runSortingTests(Inventory inv) {
+        System.out.println("\n--- 📈 SIRALAMA TESTLERİ ---");
+        inv.sortByPrice();
+        inv.sortByQuantity();
+        inv.listInventory();
+    }
+
+    // Analiz ve raporlama testleri
+    private static void runReportingTests(Inventory inv) {
+        System.out.println("\n📊 --- ENVANTER ANALİZ RAPORU ---");
+        System.out.println("Toplam Mali Değer: " + inv.calculateTotalValue() + " TL");
+        System.out.println("En Pahalı Ürün: " + inv.getMostExpensiveProduct().getName());
+        System.out.println("En Ucuz Ürün: " + inv.getCheapestProduct().getName());
+        inv.checkLowStockAlerts();
+    }
+
+    // Gelişmiş arama testleri
+    private static void runSearchTests(Inventory inv) {
+        System.out.println("\n🔍 --- ARAMA TESTLERİ ---");
+        List<Product> results = inv.filterProductsByName("el");
+        for (Product p : results) {
+            System.out.println("-> Eşleşme Bulundu: " + p.getName());
+        }
     }
 }
