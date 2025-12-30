@@ -24,6 +24,24 @@ public class Inventory {
         System.out.println("Sistem: ID'si " + id + " olan ürün için silme işlemi yapıldı.");
     }
 
+    // YENİ: Stok miktarını güncelleme (Artırma/Azaltma)
+    public boolean updateProductStock(String id, int change) {
+        for (Product p : products) {
+            if (p.getId().equals(id)) {
+                int newQuantity = p.getQuantity() + change;
+                if (newQuantity < 0) {
+                    System.out.println("⚠️ Hata: Stok miktarı negatif olamaz!");
+                    return false;
+                }
+                p.setQuantity(newQuantity);
+                System.out.println("Sistem: " + p.getName() + " yeni stoğu: " + newQuantity);
+                return true;
+            }
+        }
+        System.out.println("⚠️ Hata: Ürün bulunamadı!");
+        return false;
+    }
+
     public void listInventory() {
         System.out.println("\n--- Mevcut Envanter Listesi ---");
         if (products.isEmpty()) {
@@ -95,14 +113,11 @@ public class Inventory {
         return found;
     }
 
-    // --- GÜNCELLENMİŞ VE HATASI GİDERİLMİŞ DOSYA İŞLEMLERİ ---
-
     public void saveToFile(String filename) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
             for (Product p : products) {
                 long dateMillis = 0;
                 if (p instanceof PerishableProduct) {
-                    // DÜZELTME: getExpirationDate yerine getExpiryDate kullanıldı
                     dateMillis = ((PerishableProduct) p).getExpiryDate().getTime();
                 }
                 writer.println(p.getId() + "," + p.getName() + "," + p.getQuantity() + "," + p.getPrice() + "," + dateMillis);

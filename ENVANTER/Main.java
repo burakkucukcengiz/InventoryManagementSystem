@@ -24,6 +24,7 @@ public class Main {
             System.out.println("4. Detaylı Analiz Raporu");
             System.out.println("5. İsimle Ürün Ara");
             System.out.println("6. Test Verilerini Yükle (Varsayılanlar)");
+            System.out.println("7. Stok Güncelle (Artır/Azalt) 🆕");
             System.out.println("0. Kaydet ve Çıkış");
             System.out.print("Seçiminiz: ");
 
@@ -39,8 +40,7 @@ public class Main {
                         break;
                     case "3":
                         System.out.print("Silinecek Ürün ID: ");
-                        String silId = scanner.nextLine();
-                        envanter.removeProduct(silId);
+                        envanter.removeProduct(scanner.nextLine());
                         break;
                     case "4":
                         runReportingTests(envanter);
@@ -53,6 +53,13 @@ public class Main {
                         break;
                     case "6":
                         runSetup(envanter);
+                        break;
+                    case "7":
+                        System.out.print("Güncellenecek Ürün ID: ");
+                        String upId = scanner.nextLine();
+                        System.out.print("Değişim miktarı (Ekleme için +, Çıkarma için -): ");
+                        int change = Integer.parseInt(scanner.nextLine());
+                        envanter.updateProductStock(upId, change);
                         break;
                     case "0":
                         envanter.saveToFile(dosyaAdi);
@@ -69,19 +76,15 @@ public class Main {
         scanner.close();
     }
 
-    // Kullanıcıdan klavye ile veri alan yeni metod
     private static void urunEklemeMenusu(Inventory inv, Scanner sc) throws InvalidProductException {
         System.out.println("\n-- Yeni Ürün Bilgileri --");
         System.out.print("ID: "); String id = sc.nextLine();
         System.out.print("İsim: "); String isim = sc.nextLine();
         System.out.print("Adet: "); int adet = Integer.parseInt(sc.nextLine());
         System.out.print("Fiyat: "); double fiyat = Double.parseDouble(sc.nextLine());
-        
-        // Şimdilik varsayılan tarih ile ekliyoruz
         inv.addProduct(new PerishableProduct(id, isim, adet, fiyat, new Date()));
     }
 
-    // Mevcut test metodların (Silmedik, menüden çağırabiliyoruz)
     private static void runSetup(Inventory inv) throws InvalidProductException {
         inv.addProduct(new PerishableProduct("1", "Elma", 10, 15.0, new Date()));
         inv.addProduct(new PerishableProduct("2", "Süt", 3, 25.0, new Date()));
