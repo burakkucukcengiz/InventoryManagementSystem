@@ -1,56 +1,98 @@
 package ENVANTER;
 
+import java.util.Scanner;
 import java.util.Date;
 import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
         Inventory envanter = new Inventory();
+        String dosyaAdi = "envanter.txt";
+        Scanner scanner = new Scanner(System.in);
         
-        try {
-            // Testleri modüler parçalara ayırdık
-            runSetup(envanter);
-            runSortingTests(envanter);
-            runReportingTests(envanter);
-            runSearchTests(envanter);
-            
-        } catch (InvalidProductException e) {
-            System.err.println("⚠️ Sistem Hatası: " + e.getMessage());
+        // 1. ADIM: Verileri yükle
+        envanter.loadFromFile(dosyaAdi);
+
+        System.out.println("=== 📦 ENVANTER YÖNETİM SİSTEMİ V1.0 ===");
+
+        boolean devamEt = true;
+        while (devamEt) {
+            System.out.println("\n--- ANA MENÜ ---");
+            System.out.println("1. Envanteri Listele");
+            System.out.println("2. Yeni Ürün Ekle (Hızlı)");
+            System.out.println("3. Ürün Sil (ID ile)");
+            System.out.println("4. Detaylı Analiz Raporu");
+            System.out.println("5. İsimle Ürün Ara");
+            System.out.println("6. Test Verilerini Yükle (Varsayılanlar)");
+            System.out.println("0. Kaydet ve Çıkış");
+            System.out.print("Seçiminiz: ");
+
+            String secim = scanner.nextLine();
+
+            try {
+                switch (secim) {
+                    case "1":
+                        envanter.listInventory();
+                        break;
+                    case "2":
+                        urunEklemeMenusu(envanter, scanner);
+                        break;
+                    case "3":
+                        System.out.print("Silinecek Ürün ID: ");
+                        String silId = scanner.nextLine();
+                        envanter.removeProduct(silId);
+                        break;
+                    case "4":
+                        runReportingTests(envanter);
+                        break;
+                    case "5":
+                        System.out.print("Arama terimi: ");
+                        String terim = scanner.nextLine();
+                        List<Product> sonuclar = envanter.filterProductsByName(terim);
+                        sonuclar.forEach(p -> System.out.println("-> Bulundu: " + p));
+                        break;
+                    case "6":
+                        runSetup(envanter);
+                        break;
+                    case "0":
+                        envanter.saveToFile(dosyaAdi);
+                        devamEt = false;
+                        System.out.println("👋 Veriler kaydedildi, program sonlandırılıyor...");
+                        break;
+                    default:
+                        System.out.println("⚠️ Geçersiz seçim, lütfen tekrar deneyin.");
+                }
+            } catch (Exception e) {
+                System.err.println("❌ Hata: " + e.getMessage());
+            }
         }
-        
-        System.out.println("\n✅ Sistem: Program akışı başarıyla sonlandı.");
+        scanner.close();
     }
 
-    // Ürün ekleme mantığı
+    // Kullanıcıdan klavye ile veri alan yeni metod
+    private static void urunEklemeMenusu(Inventory inv, Scanner sc) throws InvalidProductException {
+        System.out.println("\n-- Yeni Ürün Bilgileri --");
+        System.out.print("ID: "); String id = sc.nextLine();
+        System.out.print("İsim: "); String isim = sc.nextLine();
+        System.out.print("Adet: "); int adet = Integer.parseInt(sc.nextLine());
+        System.out.print("Fiyat: "); double fiyat = Double.parseDouble(sc.nextLine());
+        
+        // Şimdilik varsayılan tarih ile ekliyoruz
+        inv.addProduct(new PerishableProduct(id, isim, adet, fiyat, new Date()));
+    }
+
+    // Mevcut test metodların (Silmedik, menüden çağırabiliyoruz)
     private static void runSetup(Inventory inv) throws InvalidProductException {
         inv.addProduct(new PerishableProduct("1", "Elma", 10, 15.0, new Date()));
         inv.addProduct(new PerishableProduct("2", "Süt", 3, 25.0, new Date()));
         inv.addProduct(new PerishableProduct("3", "Ekmek", 20, 10.0, new Date()));
     }
 
-    // Sıralama testleri
-    private static void runSortingTests(Inventory inv) {
-        System.out.println("\n--- 📈 SIRALAMA TESTLERİ ---");
-        inv.sortByPrice();
-        inv.sortByQuantity();
-        inv.listInventory();
-    }
-
-    // Analiz ve raporlama testleri
     private static void runReportingTests(Inventory inv) {
-        System.out.println("\n📊 --- ENVANTER ANALİZ RAPORU ---");
-        System.out.println("Toplam Mali Değer: " + inv.calculateTotalValue() + " TL");
-        System.out.println("En Pahalı Ürün: " + inv.getMostExpensiveProduct().getName());
-        System.out.println("En Ucuz Ürün: " + inv.getCheapestProduct().getName());
+        System.out.println("\n📊 --- ANALİZ RAPORU ---");
+        System.out.println("Toplam Değer: " + inv.calculateTotalValue() + " TL");
+        Product expensive = inv.getMostExpensiveProduct();
+        if (expensive != null) System.out.println("En Pahalı: " + expensive.getName());
         inv.checkLowStockAlerts();
-    }
-
-    // Gelişmiş arama testleri
-    private static void runSearchTests(Inventory inv) {
-        System.out.println("\n🔍 --- ARAMA TESTLERİ ---");
-        List<Product> results = inv.filterProductsByName("el");
-        for (Product p : results) {
-            System.out.println("-> Eşleşme Bulundu: " + p.getName());
-        }
     }
 }

@@ -3,11 +3,11 @@ package ENVANTER;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Comparator;
+import java.io.*;
 
 public class Inventory {
-    private List<Product> products = new ArrayList<>(); 
+    private List<Product> products = new ArrayList<>();
 
-    // YENİ: addProduct artık InvalidProductException fırlatabilir
     public void addProduct(Product product) throws InvalidProductException {
         if (product.getQuantity() < 0) {
             throw new InvalidProductException("Hata: " + product.getName() + " için stok miktarı negatif olamaz!");
@@ -19,13 +19,11 @@ public class Inventory {
         System.out.println("Sistem: " + product.getName() + " envantere başarıyla eklendi.");
     }
 
-    // DÜZELTME: Daha güvenli olması için ID üzerinden silme yapıyoruz
     public void removeProduct(String id) {
-        products.removeIf(p -> p.getId().equals(id)); 
+        products.removeIf(p -> p.getId().equals(id));
         System.out.println("Sistem: ID'si " + id + " olan ürün için silme işlemi yapıldı.");
     }
 
-    // GELİŞTİRME: Product içindeki toString() metodunu kullanarak listeler
     public void listInventory() {
         System.out.println("\n--- Mevcut Envanter Listesi ---");
         if (products.isEmpty()) {
@@ -38,17 +36,15 @@ public class Inventory {
         System.out.println("-------------------------------\n");
     }
 
-    // YENİ: Ürünleri ucuzdan pahalıya sıralayan metod
-public void sortByPrice() {
-    products.sort(Comparator.comparingDouble(Product::getPrice));
-    System.out.println("Sistem: Ürünler fiyata göre (en düşükten en yükseğe) sıralandı.");
-}
+    public void sortByPrice() {
+        products.sort(Comparator.comparingDouble(Product::getPrice));
+        System.out.println("Sistem: Ürünler fiyata göre sıralandı.");
+    }
 
-// YENİ: Ürünleri stok miktarına göre (en azdan en çoğa) sıralar
-public void sortByQuantity() {
-    products.sort(Comparator.comparingInt(Product::getQuantity));
-    System.out.println("Sistem: Ürünler stok miktarına göre (kritik seviyeden yukarıya) sıralandı.");
-}
+    public void sortByQuantity() {
+        products.sort(Comparator.comparingInt(Product::getQuantity));
+        System.out.println("Sistem: Ürünler stok miktarına göre sıralandı.");
+    }
 
     public void checkLowStockAlerts() {
         for (Product p : products) {
@@ -70,7 +66,7 @@ public void sortByQuantity() {
     public int getProductCount() {
         return products.size();
     }
-    // 11. COMMIT ÖZELLİĞİ: Envanterin toplam TL değerini hesaplar
+
     public double calculateTotalValue() {
         double totalValue = 0;
         for (Product p : products) {
@@ -79,34 +75,67 @@ public void sortByQuantity() {
         return totalValue;
     }
 
-    // 12. COMMIT ÖZELLİĞİ: En pahalı ürünü bulur
     public Product getMostExpensiveProduct() {
         if (products.isEmpty()) return null;
-        Product max = products.get(0);
-        for (Product p : products) {
-            if (p.getPrice() > max.getPrice()) max = p;
-        }
-        return max;
+        return products.stream().max(Comparator.comparingDouble(Product::getPrice)).orElse(null);
     }
 
-    // 12. COMMIT ÖZELLİĞİ: En ucuz ürünü bulur
     public Product getCheapestProduct() {
         if (products.isEmpty()) return null;
-        Product min = products.get(0);
+        return products.stream().min(Comparator.comparingDouble(Product::getPrice)).orElse(null);
+    }
+
+    public List<Product> filterProductsByName(String part) {
+        List<Product> found = new ArrayList<>();
         for (Product p : products) {
-            if (p.getPrice() < min.getPrice()) min = p;
+            if (p.getName().toLowerCase().contains(part.toLowerCase())) {
+                found.add(p);
+            }
         }
-        return min;
+        return found;
     }
-    // 13. COMMIT ÖZELLİĞİ: İsminde belirli bir metin geçen tüm ürünleri listeler
-public List<Product> filterProductsByName(String part) {
-    List<Product> found = new ArrayList<>();
-    for (Product p : products) {
-        // contains ve toLowerCase ile esnek arama yapıyoruz
-        if (p.getName().toLowerCase().contains(part.toLowerCase())) {
-            found.add(p);
+
+    // --- GÜNCELLENMİŞ VE HATASI GİDERİLMİŞ DOSYA İŞLEMLERİ ---
+
+    public void saveToFile(String filename) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
+            for (Product p : products) {
+                long dateMillis = 0;
+                if (p instanceof PerishableProduct) {
+                    // DÜZELTME: getExpirationDate yerine getExpiryDate kullanıldı
+                    dateMillis = ((PerishableProduct) p).getExpiryDate().getTime();
+                }
+                writer.println(p.getId() + "," + p.getName() + "," + p.getQuantity() + "," + p.getPrice() + "," + dateMillis);
+            }
+            System.out.println("Sistem: Tüm veriler (tarihler dahil) '" + filename + "' dosyasına kaydedildi.");
+        } catch (IOException e) {
+            System.err.println("Hata: Dosya yazılamadı! " + e.getMessage());
         }
     }
-    return found;
-}
+
+    public void loadFromFile(String filename) {
+        File file = new File(filename);
+        if (!file.exists()) return;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 4) {
+                    String id = parts[0];
+                    String name = parts[1];
+                    int qty = Integer.parseInt(parts[2]);
+                    double price = Double.parseDouble(parts[3]);
+
+                    long dateMillis = (parts.length == 5) ? Long.parseLong(parts[4]) : System.currentTimeMillis();
+                    java.util.Date expDate = new java.util.Date(dateMillis);
+
+                    this.addProduct(new PerishableProduct(id, name, qty, price, expDate));
+                }
+            }
+            System.out.println("Sistem: Veriler başarıyla geri yüklendi.");
+        } catch (Exception e) {
+            System.err.println("Hata: Veriler yüklenirken bir sorun oluştu! " + e.getMessage());
+        }
+    }
 }
