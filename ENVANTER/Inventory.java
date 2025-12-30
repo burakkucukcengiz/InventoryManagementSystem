@@ -8,149 +8,112 @@ import java.io.*;
 public class Inventory {
     private List<Product> products = new ArrayList<>();
 
+    // Ürün ekleme
     public void addProduct(Product product) throws InvalidProductException {
-        if (product.getQuantity() < 0) {
-            throw new InvalidProductException("Hata: " + product.getName() + " için stok miktarı negatif olamaz!");
-        }
-        if (product.getPrice() <= 0) {
-            throw new InvalidProductException("Hata: " + product.getName() + " fiyatı 0 veya daha az olamaz!");
-        }
+        if (product.getQuantity() < 0) throw new InvalidProductException("Stok negatif olamaz!");
+        if (product.getPrice() <= 0) throw new InvalidProductException("Fiyat 0'dan büyük olmalı!");
         products.add(product);
-        System.out.println("Sistem: " + product.getName() + " envantere başarıyla eklendi.");
+        System.out.println("Sistem: " + product.getName() + " başarıyla eklendi.");
     }
 
+    // Ürün silme
     public void removeProduct(String id) {
         products.removeIf(p -> p.getId().equals(id));
-        System.out.println("Sistem: ID'si " + id + " olan ürün için silme işlemi yapıldı.");
+        System.out.println("Sistem: ID'si " + id + " olan ürün silindi.");
     }
 
-    // YENİ: Stok miktarını güncelleme (Artırma/Azaltma)
+    // --- KRİTİK STOK KONTROLÜ (Hata aldığın yer burası kanka) ---
+    public void checkLowStockAlerts() {
+        boolean alertFound = false;
+        for (Product p : products) {
+            if (p.isLowStock()) {
+                System.out.println("⚠️ UYARI: " + p.getName() + " stoğu azalıyor! (Mevcut: " + p.getQuantity() + ")");
+                alertFound = true;
+            }
+        }
+        if (!alertFound) System.out.println("Sistem: Kritik stokta ürün yok.");
+    }
+
+    // Stok miktarını güncelleme
     public boolean updateProductStock(String id, int change) {
         for (Product p : products) {
             if (p.getId().equals(id)) {
                 int newQuantity = p.getQuantity() + change;
-                if (newQuantity < 0) {
-                    System.out.println("⚠️ Hata: Stok miktarı negatif olamaz!");
-                    return false;
-                }
+                if (newQuantity < 0) return false;
                 p.setQuantity(newQuantity);
-                System.out.println("Sistem: " + p.getName() + " yeni stoğu: " + newQuantity);
                 return true;
             }
         }
-        System.out.println("⚠️ Hata: Ürün bulunamadı!");
         return false;
     }
 
+    // Detayları güncelleme (İsim ve Fiyat)
+    public boolean updateProductDetails(String id, String newName, double newPrice) {
+        for (Product p : products) {
+            if (p.getId().equals(id)) {
+                p.setName(newName);
+                p.setPrice(newPrice);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Raporu dosyaya aktarma
+    public void exportFinancialReport(String filename) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
+            writer.println("=== 📊 M4 PRO ENVANTER RAPORU ===");
+            writer.println("Tarih: " + new java.util.Date());
+            writer.println("Toplam Değer: " + calculateTotalValue() + " TL");
+            System.out.println("Sistem: Rapor '" + filename + "' olarak kaydedildi.");
+        } catch (IOException e) {
+            System.err.println("Rapor hatası: " + e.getMessage());
+        }
+    }
+
     public void listInventory() {
-        System.out.println("\n--- Mevcut Envanter Listesi ---");
-        if (products.isEmpty()) {
-            System.out.println("Envanter şu an boş.");
-        } else {
-            for (Product p : products) {
-                System.out.println(p.toString());
-            }
-        }
-        System.out.println("-------------------------------\n");
-    }
-
-    public void sortByPrice() {
-        products.sort(Comparator.comparingDouble(Product::getPrice));
-        System.out.println("Sistem: Ürünler fiyata göre sıralandı.");
-    }
-
-    public void sortByQuantity() {
-        products.sort(Comparator.comparingInt(Product::getQuantity));
-        System.out.println("Sistem: Ürünler stok miktarına göre sıralandı.");
-    }
-
-    public void checkLowStockAlerts() {
-        for (Product p : products) {
-            if (p.isLowStock()) {
-                System.out.println("⚠️ UYARI: " + p.getName() + " stoğu azalıyor! (Mevcut: " + p.getQuantity() + ")");
-            }
-        }
-    }
-
-    public Product searchProduct(String name) {
-        for (Product p : products) {
-            if (p.getName().equalsIgnoreCase(name)) {
-                return p;
-            }
-        }
-        return null;
-    }
-
-    public int getProductCount() {
-        return products.size();
+        System.out.println("\n--- Mevcut Envanter ---");
+        products.forEach(p -> System.out.println(p.toString()));
     }
 
     public double calculateTotalValue() {
-        double totalValue = 0;
-        for (Product p : products) {
-            totalValue += p.getPrice() * p.getQuantity();
-        }
-        return totalValue;
+        return products.stream().mapToDouble(p -> p.getPrice() * p.getQuantity()).sum();
     }
 
     public Product getMostExpensiveProduct() {
-        if (products.isEmpty()) return null;
         return products.stream().max(Comparator.comparingDouble(Product::getPrice)).orElse(null);
     }
 
-    public Product getCheapestProduct() {
-        if (products.isEmpty()) return null;
-        return products.stream().min(Comparator.comparingDouble(Product::getPrice)).orElse(null);
-    }
-
     public List<Product> filterProductsByName(String part) {
-        List<Product> found = new ArrayList<>();
-        for (Product p : products) {
-            if (p.getName().toLowerCase().contains(part.toLowerCase())) {
-                found.add(p);
-            }
-        }
-        return found;
+        return products.stream()
+                .filter(p -> p.getName().toLowerCase().contains(part.toLowerCase()))
+                .toList();
     }
 
+    public int getProductCount() { return products.size(); }
+
+    // Dosya İşlemleri
     public void saveToFile(String filename) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
             for (Product p : products) {
-                long dateMillis = 0;
-                if (p instanceof PerishableProduct) {
-                    dateMillis = ((PerishableProduct) p).getExpiryDate().getTime();
-                }
-                writer.println(p.getId() + "," + p.getName() + "," + p.getQuantity() + "," + p.getPrice() + "," + dateMillis);
+                long d = (p instanceof PerishableProduct) ? ((PerishableProduct) p).getExpiryDate().getTime() : 0;
+                writer.println(p.getId() + "," + p.getName() + "," + p.getQuantity() + "," + p.getPrice() + "," + d);
             }
-            System.out.println("Sistem: Tüm veriler (tarihler dahil) '" + filename + "' dosyasına kaydedildi.");
-        } catch (IOException e) {
-            System.err.println("Hata: Dosya yazılamadı! " + e.getMessage());
-        }
+        } catch (IOException e) { System.err.println("Kayıt hatası: " + e.getMessage()); }
     }
 
     public void loadFromFile(String filename) {
         File file = new File(filename);
         if (!file.exists()) return;
-
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length >= 4) {
-                    String id = parts[0];
-                    String name = parts[1];
-                    int qty = Integer.parseInt(parts[2]);
-                    double price = Double.parseDouble(parts[3]);
-
-                    long dateMillis = (parts.length == 5) ? Long.parseLong(parts[4]) : System.currentTimeMillis();
-                    java.util.Date expDate = new java.util.Date(dateMillis);
-
-                    this.addProduct(new PerishableProduct(id, name, qty, price, expDate));
+                String[] pts = line.split(",");
+                if (pts.length >= 4) {
+                    long d = (pts.length == 5) ? Long.parseLong(pts[4]) : System.currentTimeMillis();
+                    this.addProduct(new PerishableProduct(pts[0], pts[1], Integer.parseInt(pts[2]), Double.parseDouble(pts[3]), new java.util.Date(d)));
                 }
             }
-            System.out.println("Sistem: Veriler başarıyla geri yüklendi.");
-        } catch (Exception e) {
-            System.err.println("Hata: Veriler yüklenirken bir sorun oluştu! " + e.getMessage());
-        }
+        } catch (Exception e) { System.err.println("Yükleme hatası!"); }
     }
 }
