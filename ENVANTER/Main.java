@@ -49,8 +49,21 @@ public class Main {
                         envanter.updateProductDetails(editId, nName, nPrice);
                         break;
                     case "9":
-                        // GitHub tahtasındaki 'Final Raporu' görevini bitiren kısım
+                        // GitHub tahtasındaki 'Final Raporu' görevini bitirir
                         envanter.exportFinancialReport("final_raporu.txt");
+                        break;
+                    case "10":
+                        // YENİ: Gelişmiş Arama - Fiyat Aralığı Filtreleme
+                        double minPrice = getSafeDouble("Minimum Fiyat: ");
+                        double maxPrice = getSafeDouble("Maksimum Fiyat: ");
+                        List<Product> rangeResults = envanter.filterProductsByPriceRange(minPrice, maxPrice);
+                        
+                        if (rangeResults.isEmpty()) {
+                            System.out.println("⚠️ Bu fiyat aralığında ürün bulunamadı.");
+                        } else {
+                            System.out.println("\n--- " + minPrice + " TL - " + maxPrice + " TL Arası Ürünler ---");
+                            rangeResults.forEach(p -> System.out.println(p.toString()));
+                        }
                         break;
                     case "0":
                         envanter.saveToFile(dosyaAdi);
@@ -70,7 +83,7 @@ public class Main {
         System.out.println("1. Tabloyu Listele | 2. Ürün Ekle | 3. Ürün Sil");
         System.out.println("4. Hızlı Analiz   | 5. İsimle Ara | 6. Hazır Veri Yükle");
         System.out.println("7. Stok Güncelle  | 8. Detay Düzenle | 9. FİNAL RAPORU (EXPORT)");
-        System.out.println("0. KAYDET VE ÇIK");
+        System.out.println("10. FİYAT ARALIĞI ARA 🔍 | 0. KAYDET VE ÇIK");
         System.out.print("Seçiminiz: ");
     }
 
