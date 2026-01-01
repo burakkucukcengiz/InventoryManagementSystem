@@ -22,7 +22,7 @@ public class Inventory {
         System.out.println("Sistem: ID'si " + id + " olan ürün silindi.");
     }
 
-    // --- KRİTİK STOK KONTROLÜ (Hata aldığın yer burası kanka) ---
+    // --- KRİTİK STOK KONTROLÜ ---
     public void checkLowStockAlerts() {
         boolean alertFound = false;
         for (Product p : products) {
@@ -71,6 +71,27 @@ public class Inventory {
         }
     }
 
+    // GELİŞTİRME: Ürünleri şık bir tablo formatında gösterir
+    public void listInventoryTable() {
+        if (products.isEmpty()) {
+            System.out.println("⚠️ Envanter şu an boş.");
+            return;
+        }
+        // Tablo başlığı ve hizalama
+        System.out.println("\n" + "=".repeat(95));
+        System.out.printf("%-5s | %-20s | %-10s | %-12s | %-30s\n", "ID", "İSİM", "STOK", "FİYAT", "SON KULLANMA");
+        System.out.println("-".repeat(95));
+        
+        for (Product p : products) {
+            String dateStr = (p instanceof PerishableProduct) ? ((PerishableProduct) p).getExpiryDate().toString() : "N/A";
+            // Verileri sütunlara göre hizalayarak yazdır
+            System.out.printf("%-5s | %-20s | %-10d | %-12.2f | %-30s\n", 
+                              p.getId(), p.getName(), p.getQuantity(), p.getPrice(), dateStr);
+        }
+        System.out.println("=".repeat(95) + "\n");
+    }
+
+    // Eski listeleme metodu (Yedek olarak durabilir veya silinebilir)
     public void listInventory() {
         System.out.println("\n--- Mevcut Envanter ---");
         products.forEach(p -> System.out.println(p.toString()));

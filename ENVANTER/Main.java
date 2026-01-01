@@ -18,7 +18,7 @@ public class Main {
         boolean devamEt = true;
         while (devamEt) {
             System.out.println("\n--- ANA MENÜ ---");
-            System.out.println("1. Envanteri Listele");
+            System.out.println("1. Envanteri Listele (Tablo Görünümü) 📋");
             System.out.println("2. Yeni Ürün Ekle (Hızlı)");
             System.out.println("3. Ürün Sil (ID ile)");
             System.out.println("4. Detaylı Analiz Raporu");
@@ -33,7 +33,8 @@ public class Main {
             try {
                 switch (secim) {
                     case "1":
-                        envanter.listInventory();
+                        // GÜNCELLEME: Profesyonel tablo görünümü çağırılıyor
+                        envanter.listInventoryTable(); 
                         break;
                     case "2":
                         urunEklemeMenusu(envanter, scanner);
