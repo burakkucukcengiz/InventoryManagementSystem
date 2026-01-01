@@ -1,4 +1,4 @@
-package ENVANTER;   
+package com.burak.exception;
 
 // Hatalı ürün girişi yapıldığında fırlatacağımız özel hata sınıfı
 public class InvalidProductException extends Exception {

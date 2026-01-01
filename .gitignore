@@ -1,0 +1,20 @@
+# --- Java Derleme Dosyaları ---
+*.class
+bin/
+
+# --- VS Code Özel Ayarları ---
+.vscode/
+*.code-workspace
+
+# --- İşletim Sistemi Geçici Dosyaları ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Proje Veri ve Rapor Dosyaları ---
+# Çalışma sırasında oluşan txt dosyalarını ignore ediyoruz
+envanter.txt
+final_raporu.txt
+
+# --- Log Dosyaları ---
+*.log

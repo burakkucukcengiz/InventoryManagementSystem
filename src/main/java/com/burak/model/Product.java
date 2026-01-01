@@ -1,4 +1,6 @@
-package ENVANTER;
+package com.burak.model;
+
+import com.burak.exception.InvalidProductException;
 
 public abstract class Product implements Storable {
     private String id;
@@ -6,7 +8,7 @@ public abstract class Product implements Storable {
     private int quantity;
     private double price;
 
-    // CONSTRUCTOR GÜNCELLENDİ: Validation ve Exception eklendi
+    // CONSTRUCTOR: Validation ve Exception yapısı korundu
     public Product(String id, String name, int quantity, double price) throws InvalidProductException {
         if (id == null || id.isEmpty()) {
             throw new InvalidProductException("Hata: Ürün ID'si boş olamaz!");
@@ -20,16 +22,29 @@ public abstract class Product implements Storable {
         this.price = price;
     }
 
-    public String getId() { 
-        return id; 
-    }
-    
+    // --- GETTER METOTLARI ---
+    public String getId() { return id; }
     public String getName() { return name; }
     public int getQuantity() { return quantity; }
     public double getPrice() { return price; } 
-    
-    public void setQuantity(int quantity) { this.quantity = quantity; }
 
+    // --- SETTER METOTLARI (HATALARI DÜZELTEN KISIM) ---
+    
+    // Inventory sınıfındaki p.setName(newName) hatasını çözer
+    public void setName(String name) { 
+        this.name = name; 
+    }
+
+    // Inventory sınıfındaki p.setPrice(newPrice) hatasını çözer
+    public void setPrice(double price) { 
+        this.price = price; 
+    }
+    
+    public void setQuantity(int quantity) { 
+        this.quantity = quantity; 
+    }
+
+    // --- INTERFACE VE OVERRIDE METOTLARI ---
     @Override
     public void updateStock(int amount) {
         this.quantity += amount;
@@ -42,6 +57,7 @@ public abstract class Product implements Storable {
 
     @Override
     public String toString() {
-        return "Ürün [ID=" + id + ", İsim=" + name + ", Stok=" + quantity + ", Fiyat=" + price + "]";
+        return String.format("Ürün [ID=%s, İsim=%s, Stok=%d, Fiyat=%.2f TL]", 
+                             id, name, quantity, price);
     }
 }

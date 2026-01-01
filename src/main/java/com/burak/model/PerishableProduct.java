@@ -1,6 +1,8 @@
-package ENVANTER;
+package com.burak.model;
 
 import java.util.Date;
+
+import com.burak.exception.InvalidProductException;
 
 public class PerishableProduct extends Product {
     private Date expiryDate;

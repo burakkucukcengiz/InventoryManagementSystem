@@ -1,6 +1,12 @@
-package ENVANTER;
+package com.burak.ui;
 
 import java.util.Scanner;
+
+import com.burak.exception.InvalidProductException;
+import com.burak.model.PerishableProduct;
+import com.burak.model.Product;
+import com.burak.service.Inventory;
+
 import java.util.Date;
 import java.util.List;
 
