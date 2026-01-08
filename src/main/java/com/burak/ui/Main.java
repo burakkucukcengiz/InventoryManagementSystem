@@ -3,10 +3,8 @@ package com.burak.ui;
 import java.util.Scanner;
 import com.burak.exception.InvalidProductException;
 import com.burak.model.PerishableProduct;
-import com.burak.model.Product;
 import com.burak.service.Inventory;
 import java.util.Date;
-import java.util.List;
 
 public class Main {
     private static Scanner scanner = new Scanner(System.in);
@@ -15,12 +13,9 @@ public class Main {
         Inventory envanter = new Inventory();
         String dosyaAdi = "envanter.txt";
         
-        // Başlangıçta verileri yükle
         envanter.loadFromFile(dosyaAdi);
 
-        System.out.println("\n**************************************************");
-        System.out.println("🚀 ENVANTER YÖNETİM SİSTEMİNE HOŞ GELDİNİZ");
-        System.out.println("**************************************************");
+        System.out.println("\n ENVANTER YÖNETİM SİSTEMİ ");
 
         boolean devamEt = true;
         while (devamEt) {
@@ -29,88 +24,59 @@ public class Main {
 
             try {
                 switch (secim) {
-                    case "1": 
-                        envanter.listInventoryTable(); 
-                        break;
-                    case "2": 
-                        urunEklemeFormu(envanter); 
-                        System.out.println("✅ Ürün başarıyla sisteme eklendi.");
-                        break;
+                    case "1": envanter.listInventoryTable(); break;
+                    case "2": urunEklemeFormu(envanter); break;
                     case "3":
-                        System.out.print("🗑️ Silinecek Ürün ID: ");
+                        System.out.print("🗑️ Silinecek ID: ");
                         envanter.removeProduct(scanner.nextLine());
-                        System.out.println("✅ Silme işlemi tamamlandı.");
                         break;
-                    case "4": 
-                        runReportingTests(envanter); 
-                        break;
+                    case "4": runReportingTests(envanter); break;
                     case "5":
-                        System.out.print("🔍 Arama terimi: ");
-                        String terim = scanner.nextLine();
-                        List<Product> sonuclar = envanter.filterProductsByName(terim);
-                        if(sonuclar.isEmpty()) System.out.println("⚠️ Eşleşen ürün bulunamadı.");
-                        else sonuclar.forEach(p -> System.out.println("-> " + p));
+                        String t = getSafeString("🔍 Arama terimi: ");
+                        envanter.printFormattedTable(envanter.filterProductsByName(t));
                         break;
-                    case "6": 
-                        runSetup(envanter); 
-                        System.out.println("📦 Hazır veriler başarıyla yüklendi.");
-                        break;
+                    case "6": runSetup(envanter); break;
                     case "7":
-                        System.out.print("🔄 Ürün ID: "); String upId = scanner.nextLine();
-                        int change = getSafeInt("Miktar değişimi (Örn: +5 veya -3): ");
-                        envanter.updateProductStock(upId, change);
-                        System.out.println("✅ Stok güncellendi.");
+                        String id7 = getSafeString("🔄 Ürün ID: ");
+                        int c = getSafeInt("Miktar değişimi: ");
+                        if(!envanter.updateProductStock(id7, c)) System.out.println("⚠️ Hata: Stok negatife düşemez veya ID yanlış!");
                         break;
                     case "8":
-                        System.out.print("📝 Güncellenecek ID: "); String editId = scanner.nextLine();
-                        System.out.print("Yeni İsim: "); String nName = scanner.nextLine();
-                        double nPrice = getSafeDouble("Yeni Fiyat: ");
-                        envanter.updateProductDetails(editId, nName, nPrice);
-                        System.out.println("✅ Ürün detayları güncellendi.");
+                        String id8 = getSafeString("📝 Düzenlenecek ID: ");
+                        String nN = getSafeString("Yeni İsim: ");
+                        double nP = getSafeDouble("Yeni Fiyat: ");
+                        envanter.updateProductDetails(id8, nN, nP);
                         break;
-                    case "9":
-                        envanter.exportFinancialReport("final_raporu.txt");
-                        System.out.println("📄 'final_raporu.txt' başarıyla oluşturuldu.");
-                        break;
+                    case "9": envanter.exportFinancialReport("final_raporu.txt"); break;
                     case "10":
-                        double minPrice = getSafeDouble("Minimum Fiyat: ");
-                        double maxPrice = getSafeDouble("Maksimum Fiyat: ");
-                        List<Product> rangeResults = envanter.filterProductsByPriceRange(minPrice, maxPrice);
-                        
-                        if (rangeResults.isEmpty()) {
-                            System.out.println("⚠️ Bu fiyat aralığında ürün bulunamadı.");
-                        } else {
-                            System.out.println("\n--- SONUÇLAR ---");
-                            rangeResults.forEach(p -> System.out.println(p.toString()));
-                        }
+                        double min = getSafeDouble("Min Fiyat: ");
+                        double max = getSafeDouble("Max Fiyat: ");
+                        envanter.printFormattedTable(envanter.filterProductsByPriceRange(min, max));
                         break;
+                    case "11": envanter.listSortedByPrice(true); break;
+                    case "12": envanter.listSortedByPrice(false); break;
                     case "0":
                         envanter.saveToFile(dosyaAdi);
                         devamEt = false;
-                        System.out.println("💾 Veriler kaydedildi. Hoşça kalın! 👋");
+                        System.out.println("👋 Kaydedildi ve çıkıldı.");
                         break;
-                    default: 
-                        System.out.println("⚠️ Geçersiz seçim! Lütfen menüden bir numara seçin.");
+                    default: System.out.println("⚠️ Geçersiz seçim!");
                 }
             } catch (Exception e) {
-                System.err.println("❌ Hata: " + e.getMessage());
+                // Bu blok programın çökmesini engelleyen son kaledir
+                System.err.println("❌ Beklenmedik bir hata oluştu: " + e.getMessage());
             }
         }
     }
 
-    private static void printMenu() {
-        System.out.println("\n==================================================");
-        System.out.println("               🛠️  YÖNETİM PANELİ");
-        System.out.println("==================================================");
-        System.out.printf("  [1] %-18s | [2] %-18s\n", "Tabloyu Listele", "Yeni Ürün Ekle");
-        System.out.printf("  [3] %-18s | [4] %-18s\n", "Ürün Sil", "Hızlı Analiz");
-        System.out.printf("  [5] %-18s | [6] %-18s\n", "İsimle Ara", "Hazır Veri Yükle");
-        System.out.printf("  [7] %-18s | [8] %-18s\n", "Stok Güncelle", "Detay Düzenle");
-        System.out.printf("  [9] %-18s | [10] %-18s\n", "FİNAL RAPORU 📄", "FİYAT ARALIĞI 🔍");
-        System.out.println("--------------------------------------------------");
-        System.out.println("  [0] KAYDET VE GÜVENLİ ÇIKIŞ");
-        System.out.println("==================================================");
-        System.out.print("👉 Seçiminiz: ");
+    // BOŞ GİRİŞİ ENGELLEYEN YENİ METOT
+    private static String getSafeString(String mesaj) {
+        while (true) {
+            System.out.print(mesaj);
+            String input = scanner.nextLine().trim();
+            if (!input.isEmpty()) return input;
+            System.out.println("⚠️ Hata: Bu alan boş bırakılamaz!");
+        }
     }
 
     private static int getSafeInt(String mesaj) {
@@ -119,7 +85,7 @@ public class Main {
                 System.out.print(mesaj);
                 return Integer.parseInt(scanner.nextLine());
             } catch (NumberFormatException e) {
-                System.out.println("⚠️ Hata: Lütfen geçerli bir tam sayı girin!");
+                System.out.println("⚠️ Hata: Lütfen tam sayı girin!");
             }
         }
     }
@@ -128,31 +94,67 @@ public class Main {
         while (true) {
             try {
                 System.out.print(mesaj);
-                return Double.parseDouble(scanner.nextLine());
+                double v = Double.parseDouble(scanner.nextLine());
+                if (v >= 0) return v;
+                System.out.println("⚠️ Hata: Değer negatif olamaz!");
             } catch (NumberFormatException e) {
-                System.out.println("⚠️ Hata: Lütfen geçerli bir ondalıklı sayı girin!");
+                System.out.println("⚠️ Hata: Lütfen geçerli bir sayı girin!");
             }
         }
     }
 
     private static void urunEklemeFormu(Inventory inv) throws InvalidProductException {
-        System.out.println("\n--- Yeni Ürün Formu ---");
-        System.out.print("ID: "); String id = scanner.nextLine();
-        System.out.print("İsim: "); String isim = scanner.nextLine();
+        System.out.println("\n--- Yeni Ürün Kaydı ---");
+        String id = getSafeString("ID: ");
+        String isim = getSafeString("İsim: ");
         int adet = getSafeInt("Adet: ");
         double fiyat = getSafeDouble("Fiyat: ");
         inv.addProduct(new PerishableProduct(id, isim, adet, fiyat, new Date()));
+        System.out.println("✅ Ürün eklendi.");
+    }
+
+    private static void printMenu() {
+        // Toplam iç genişlik: 54 karakter
+        String topBorder = "╔" + "═".repeat(54) + "╗";
+        String midBorder = "╟" + "─".repeat(54) + "╢";
+        String botBorder = "╚" + "═".repeat(54) + "╝";
+    
+        System.out.println("\n" + topBorder);
+        // Emoji 2 karakter yer kapladığı için boşluk sayısını 1 azalttık (Hizalama Sırrı)
+        System.out.println("║               📦 ENVANTER YÖNETİM SİSTEMİ            ║");
+        System.out.println(midBorder);
+        
+        // --- ENVANTER İŞLEMLERİ ---
+        System.out.println("║ [ ENVANTER ]                                         ║");
+        System.out.printf("║  %-25s | %-24s ║\n", "[1] Tabloyu Listele", "[2] Yeni Ürün Ekle");
+        System.out.printf("║  %-25s | %-24s ║\n", "[3] Ürün Sil", "[7] Stok Güncelle");
+        System.out.printf("║  %-25s | %-24s ║\n", "[8] Detay Düzenle", "");
+        System.out.println(midBorder);
+    
+        // --- ARAMA VE SIRALAMA ---
+        System.out.println("║ [ ARAMA & SIRALAMA ]                                 ║");
+        System.out.printf("║  %-25s | %-24s ║\n", "[5] İsimle Ara", "[10] Fiyat Aralığı");
+        System.out.printf("║  %-25s | %-24s ║\n", "[11] Ucuzdan Pahalıya", "[12] Pahalıdan Ucuza");
+        System.out.println(midBorder);
+    
+        // --- ANALİZ VE SİSTEM ---
+        System.out.println("║ [ ANALİZ & SİSTEM ]                                  ║");
+        System.out.printf("║  %-25s | %-24s ║\n", "[4] Hızlı Analiz", "[9] Finansal Rapor");
+        System.out.printf("║  %-25s | %-24s ║\n", "[6] Hazır Veri Yükle", "[0] KAYDET VE ÇIK");
+        
+        System.out.println(botBorder);
+        System.out.print("👉 İşlem seçiniz: ");
     }
 
     private static void runSetup(Inventory inv) throws InvalidProductException {
-        inv.addProduct(new PerishableProduct("1", "Elma", 10, 15.0, new Date()));
-        inv.addProduct(new PerishableProduct("2", "Sut", 3, 25.0, new Date()));
-        inv.addProduct(new PerishableProduct("3", "Ekmek", 20, 10.0, new Date()));
+        try {
+            inv.addProduct(new PerishableProduct("1", "Elma", 10, 15.0, new Date()));
+            inv.addProduct(new PerishableProduct("2", "Sut", 3, 25.0, new Date()));
+        } catch(Exception e) {} // Hazır verilerde çakışma olursa görmezden gel
     }
 
     private static void runReportingTests(Inventory inv) {
-        System.out.println("\n📊 --- ANALİZ RAPORU ---");
-        System.out.println("Toplam Envanter Değeri: " + inv.calculateTotalValue() + " TL");
+        System.out.println("\n📊 Toplam Değer: " + String.format("%.2f", inv.calculateTotalValue()) + " TL");
         inv.checkLowStockAlerts();
     }
 }
